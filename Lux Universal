@@ -1,0 +1,416 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("Lux Universal", "BloodTheme")
+
+local Tab = Window:NewTab("Main")
+local Section = Tab:NewSection("Aimbot")
+
+Section:NewButton("Activate AimBot", "Right Click To Lock On Head", function()
+    -- Local Script for locking onto the closest player's head within an FOV circle
+-- Place this in StarterPlayerScripts
+
+-- Get the services needed
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Get the local player
+local localPlayer = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+-- Variables to store FOV GUI
+local fovCircle = nil
+
+-- Function to create FOV circle GUI
+local function createFOVGui()
+    -- Create the FOV circle GUI if it doesn't exist
+    if not fovCircle then
+        local fovRadius = 100 -- Adjust the radius to fit your desired FOV size
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.ResetOnSpawn = false -- Ensures GUI stays even after respawn
+        screenGui.Parent = localPlayer:WaitForChild("PlayerGui")
+
+        fovCircle = Instance.new("Frame", screenGui)
+        fovCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+        fovCircle.Size = UDim2.new(0, fovRadius * 2, 0, fovRadius * 2)
+        fovCircle.Position = UDim2.new(0.5, 0, 0.49, 0) -- Centered horizontally, slightly above vertical center
+        fovCircle.BackgroundColor3 = Color3.new(1, 0, 0) -- Red fill
+        fovCircle.BackgroundTransparency = 0.5
+        fovCircle.BorderSizePixel = 2 -- Set border size for outline
+        fovCircle.BorderColor3 = Color3.new(1, 1, 1) -- White outline
+
+        -- Create a UI corner to make the Frame circular
+        local uiCorner = Instance.new("UICorner", fovCircle)
+        uiCorner.CornerRadius = UDim.new(1, 0)
+    end
+end
+
+-- Initialize the FOV GUI
+createFOVGui()
+
+-- Track if the right mouse button is held down
+local isRightMouseButtonDown = false
+
+-- Function to find the closest player within the FOV
+local function getClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local head = player.Character.Head
+            local headScreenPosition, onScreen = camera:WorldToViewportPoint(head.Position)
+
+            if onScreen then
+                local screenCenter = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+                local headScreenVector = Vector2.new(headScreenPosition.X, headScreenPosition.Y)
+                local distanceFromCenter = (headScreenVector - screenCenter).Magnitude
+
+                if distanceFromCenter <= 100 and distanceFromCenter < shortestDistance then
+                    shortestDistance = distanceFromCenter
+                    closestPlayer = player
+                end
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+-- Function to update the camera to lock onto the closest player's head
+local function updateCamera()
+    if isRightMouseButtonDown then
+        local closestPlayer = getClosestPlayer()
+
+        if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("Head") then
+            local targetHead = closestPlayer.Character.Head
+            camera.CFrame = CFrame.new(camera.CFrame.Position, targetHead.Position)
+        end
+    end
+end
+
+-- Event handler for mouse button input
+local function onInputBegan(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then -- Right mouse button
+        isRightMouseButtonDown = true
+    end
+end
+
+local function onInputEnded(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then -- Right mouse button
+        isRightMouseButtonDown = false
+    end
+end
+
+-- Connect functions to input events
+UserInputService.InputBegan:Connect(onInputBegan)
+UserInputService.InputEnded:Connect(onInputEnded)
+
+-- Connect updateCamera to RenderStepped to constantly update
+RunService.RenderStepped:Connect(updateCamera)
+
+-- Ensure the FOV circle GUI is maintained across respawns
+localPlayer.CharacterAdded:Connect(function()
+    createFOVGui() -- Recreate if necessary
+end)
+
+end)
+
+Section:NewLabel("Chams")
+
+Section:NewButton("Activate Chams", "Its Chams WTF U Want To Know", function()
+    -- Define the highlight color and properties
+local highlightColor = Color3.fromRGB(255, 0, 0) -- Red color
+
+-- Function to highlight all parts of a character
+local function highlightCharacter(character)
+    -- Create a new Highlight instance
+    local highlight = Instance.new("Highlight")
+    highlight.Parent = character
+    highlight.FillColor = highlightColor
+    highlight.FillTransparency = 0.5 -- Semi-transparent
+    highlight.OutlineTransparency = 0 -- Outline is fully visible
+end
+
+-- Function to highlight all players' characters
+local function highlightAllPlayers()
+    -- Get the Players service
+    local players = game:GetService("Players")
+
+    -- Iterate over all players
+    for _, player in ipairs(players:GetPlayers()) do
+        -- Listen for when the player's character is added or changes
+        player.CharacterAdded:Connect(highlightCharacter)
+        
+        -- Highlight character if it is already loaded
+        if player.Character then
+            highlightCharacter(player.Character)
+        end
+    end
+end
+
+-- Listen for new players joining
+game.Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(highlightCharacter)
+end)
+
+-- Highlight characters for all players currently in the game
+highlightAllPlayers()
+
+end)
+
+-- Listen for new players joining
+game.Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(highlightCharacter)
+end)
+
+local Tab = Window:NewTab("Scripts")
+local Section = Tab:NewSection("Scripts")
+
+Section:NewButton("Bedwars Script", "Not Made By Me!", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/cocotv666/Aurora/main/Aurora_Loader"))()
+end)
+
+Section:NewButton("Ghost Hub", "Use The Mm2 Script Its Dope!", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/GhostHub'))(Fixed)
+end)
+
+Section:NewButton("Blox Fruits", "Not Very Good But Supports Level 3 Execs", function()
+    loadstring(game:HttpGet(("https://raw.githubusercontent.com/koonpeatch/PeatEX/master/BKHAX/BloxFruits"),true))()
+end)
+
+Section:NewButton("Da Hood", "Azure Modded", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Actyrn/Scripts/main/AzureModded"))()
+end)
+
+Section:NewButton("Lux AimBot", "My Universal Aimbot Script", function()
+    -- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+
+-- Variables
+local LocalPlayer = Players.LocalPlayer
+local IsAimbotActive = false
+local IsChamsActive = false
+local TargetPlayer = nil
+local TargetIndex = 1
+local PlayersList = {}
+local FOVRadius = 100
+
+-- Create FOV Ring
+local FOVRing = Drawing.new("Circle")
+FOVRing.Thickness = 2
+FOVRing.Transparency = 1
+FOVRing.Color = Color3.fromRGB(255, 0, 0)
+FOVRing.Radius = FOVRadius
+FOVRing.Filled = false
+FOVRing.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+-- Function to Create UI
+local function createUI()
+    local ScreenGui = Instance.new("ScreenGui")
+    local Frame = Instance.new("Frame")
+    local LuxLabel = Instance.new("TextLabel")
+    local AimbotButton = Instance.new("TextButton")
+    local ChamsButton = Instance.new("TextButton")
+    local ToggleButton = Instance.new("TextButton")
+    local PlusButton = Instance.new("TextButton")
+
+    -- Create UI elements
+    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    Frame.Parent = ScreenGui
+    Frame.Size = UDim2.new(0, 300, 0, 220) -- Height for toggle button
+    Frame.Position = UDim2.new(0, 10, 0, 10)
+    Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Frame.Visible = true -- Make sure UI is visible initially
+
+    LuxLabel.Parent = Frame
+    LuxLabel.Size = UDim2.new(1, 0, 0, 40)
+    LuxLabel.Position = UDim2.new(0, 0, 0, 0)
+    LuxLabel.Text = "Lux AimBot" -- Updated text
+    LuxLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    LuxLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    LuxLabel.TextScaled = true
+    LuxLabel.TextStrokeTransparency = 0.5
+
+    AimbotButton.Parent = Frame
+    AimbotButton.Size = UDim2.new(0, 280, 0, 40)
+    AimbotButton.Position = UDim2.new(0, 10, 0, 50)
+    AimbotButton.Text = "Toggle Aimbot"
+    AimbotButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+
+    ChamsButton.Parent = Frame
+    ChamsButton.Size = UDim2.new(0, 280, 0, 40)
+    ChamsButton.Position = UDim2.new(0, 10, 0, 100)
+    ChamsButton.Text = "Toggle Chams"
+    ChamsButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+
+    ToggleButton.Parent = Frame
+    ToggleButton.Size = UDim2.new(0, 40, 0, 40)
+    ToggleButton.Position = UDim2.new(1, -50, 0, 0) -- Positioned at the top-right corner
+    ToggleButton.Text = "X"
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleButton.TextScaled = true
+
+    PlusButton.Parent = ScreenGui
+    PlusButton.Size = UDim2.new(0, 40, 0, 40)
+    PlusButton.Position = UDim2.new(1, -50, 1, -50) -- Positioned at the bottom-right corner
+    PlusButton.Text = "+"
+    PlusButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    PlusButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PlusButton.TextScaled = true
+    PlusButton.Visible = false -- Initially hidden
+
+    -- Toggle button functionality
+    local function toggleUI()
+        Frame.Visible = not Frame.Visible
+        PlusButton.Visible = not Frame.Visible
+    end
+
+    ToggleButton.MouseButton1Click:Connect(toggleUI)
+    PlusButton.MouseButton1Click:Connect(toggleUI)
+
+    -- Event Handlers
+    AimbotButton.MouseButton1Click:Connect(function()
+        IsAimbotActive = not IsAimbotActive
+        if IsAimbotActive then
+            print("Aimbot activated!")
+        else
+            print("Aimbot deactivated!")
+        end
+    end)
+
+    ChamsButton.MouseButton1Click:Connect(function()
+        IsChamsActive = not IsChamsActive
+        if IsChamsActive then
+            print("Chams activated!")
+        else
+            print("Chams deactivated!")
+        end
+    end)
+end
+
+-- Function to handle player respawn
+local function onPlayerRespawn()
+    createUI()
+end
+
+-- Initialize UI when the player first joins
+createUI()
+
+-- Connect player respawn event
+LocalPlayer.CharacterAdded:Connect(onPlayerRespawn)
+
+-- Create Functions
+local function getPlayers()
+    PlayersList = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            table.insert(PlayersList, player)
+        end
+    end
+end
+
+local function getClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = FOVRadius
+    local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+    for _, player in pairs(PlayersList) do
+        if player.Character and player.Character:FindFirstChild("Head") then
+            local headPosition = player.Character.Head.Position
+            local screenPos, onScreen = Camera:WorldToScreenPoint(headPosition)
+            if onScreen then
+                local distance = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
+                if distance < shortestDistance then
+                    closestPlayer = player
+                    shortestDistance = distance
+                end
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+local function lockOnTarget()
+    if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("Head") then
+        local headPosition = TargetPlayer.Character.Head.Position
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, headPosition)
+    end
+end
+
+local function updateChams()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("Head") then
+            local head = player.Character.Head
+            local cham = head:FindFirstChild("Chams")
+            if IsChamsActive then
+                if not cham then
+                    cham = Instance.new("Highlight")
+                    cham.Name = "Chams"
+                    cham.Parent = head
+                    cham.FillColor = Color3.fromRGB(0, 255, 0)
+                    cham.OutlineColor = Color3.fromRGB(0, 0, 0)
+                    cham.OutlineTransparency = 0
+                    cham.FillTransparency = 0.5
+                end
+            else
+                if cham then
+                    cham:Destroy()
+                end
+            end
+        end
+    end
+end
+
+-- Event Handlers
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        IsAimbotActive = true
+        TargetPlayer = getClosestPlayer()
+    elseif input.KeyCode == Enum.KeyCode.V then
+        getPlayers()
+        if #PlayersList > 0 then
+            TargetIndex = (TargetIndex % #PlayersList) + 1
+            TargetPlayer = PlayersList[TargetIndex]
+        end
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        IsAimbotActive = false
+    end
+end)
+
+-- Main Loop
+RunService.RenderStepped:Connect(function()
+    if IsAimbotActive then
+        lockOnTarget()
+    end
+
+    FOVRing.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    FOVRing.Visible = true
+
+    updateChams()
+end)
+
+end)
+
+Section:NewButton("InfiniteYield", "Credits To EdgeIY", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+end)
+
+local Tab =Window:NewTab("Settings")
+local Section = Tab:NewSection("KeyBinds")
+
+Section:NewKeybind("Set Keybind To Open/CLose", "Read the fucking text", Enum.KeyCode.F, function()
+	Library:ToggleUI()
+end)
+
+local Tab = Window:NewTab("Info")
+local Section = Tab:NewSection("This Script Is Made By _luksu_ in discord")
